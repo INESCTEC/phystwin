@@ -1,0 +1,108 @@
+/**************************************************************************************
+Copyright 2015 Applied Research Associates, Inc.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the License
+at:
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+**************************************************************************************/
+#include <biogears/cdm/patient/conditions/SEDiabetesType2.h>
+
+#include <biogears/cdm/properties/SEScalar0To1.h>
+#include "io/cdm/PatientConditions.h"
+
+namespace biogears {
+SEDiabetesType2::SEDiabetesType2()
+  : SEPatientCondition()
+{
+  m_InsulinProductionSeverity = nullptr;
+  m_InsulinResistanceSeverity = nullptr;
+}
+//-----------------------------------------------------------------------------
+SEDiabetesType2::~SEDiabetesType2()
+{
+  Invalidate();
+}
+//-----------------------------------------------------------------------------
+void SEDiabetesType2::Invalidate()
+{
+  SEPatientCondition::Invalidate();
+  SAFE_DELETE(m_InsulinProductionSeverity);
+  SAFE_DELETE(m_InsulinResistanceSeverity);
+}
+//-----------------------------------------------------------------------------
+bool SEDiabetesType2::IsValid() const
+{
+  return SEPatientCondition::IsValid() && HasInsulinProductionSeverity() && HasInsulinResistanceSeverity();
+}
+
+//-----------------------------------------------------------------------------
+bool SEDiabetesType2::HasInsulinProductionSeverity() const
+{
+  return m_InsulinProductionSeverity == nullptr ? false : m_InsulinProductionSeverity->IsValid();
+}
+//-----------------------------------------------------------------------------
+SEScalar0To1& SEDiabetesType2::GetInsulinProductionSeverity()
+{
+  if (m_InsulinProductionSeverity == nullptr)
+    m_InsulinProductionSeverity = new SEScalar0To1();
+  return *m_InsulinProductionSeverity;
+}
+//-----------------------------------------------------------------------------
+bool SEDiabetesType2::HasInsulinResistanceSeverity() const
+{
+  return m_InsulinResistanceSeverity == nullptr ? false : m_InsulinResistanceSeverity->IsValid();
+}
+//-----------------------------------------------------------------------------
+SEScalar0To1& SEDiabetesType2::GetInsulinResistanceSeverity()
+{
+  if (m_InsulinResistanceSeverity == nullptr)
+    m_InsulinResistanceSeverity = new SEScalar0To1();
+  return *m_InsulinResistanceSeverity;
+}
+//-----------------------------------------------------------------------------
+void SEDiabetesType2::ToString(std::ostream& str) const
+{
+  str << "Patient Condition : DiabetesType2";
+  if (HasComment())
+    str << "\n\tComment: " << m_Comment;
+  str << "\n\tDiabetes Type 2 Insulin Production Severity: ";
+  HasInsulinProductionSeverity() ? str << m_InsulinProductionSeverity : str << "NaN";
+  str << "\n\tDiabetes Type 2 Insulin Resistance Severity: ";
+  HasInsulinResistanceSeverity() ? str << m_InsulinResistanceSeverity : str << "NaN";
+  str << std::flush;
+}
+//-----------------------------------------------------------------------------
+bool SEDiabetesType2::operator==(SEDiabetesType2 const& rhs) const
+{
+  if (this == &rhs)
+    return true;
+
+  return m_Comment == rhs.m_Comment
+    && ((m_InsulinProductionSeverity && rhs.m_InsulinProductionSeverity) ? m_InsulinProductionSeverity->operator==(*rhs.m_InsulinProductionSeverity) : m_InsulinProductionSeverity == rhs.m_InsulinProductionSeverity)
+    && ((m_InsulinResistanceSeverity && rhs.m_InsulinResistanceSeverity) ? m_InsulinResistanceSeverity->operator==(*rhs.m_InsulinResistanceSeverity) : m_InsulinResistanceSeverity == rhs.m_InsulinResistanceSeverity);
+}
+bool SEDiabetesType2::operator!=(SEDiabetesType2 const& rhs) const
+{
+  return !(*this == rhs);
+}
+//-------------------------------------------------------------------------------
+bool SEDiabetesType2::operator==(SECondition const& rhs) const
+{
+  try {
+    auto& diabetesType2 = dynamic_cast<SEDiabetesType2 const&>(rhs);
+    return this->operator==(diabetesType2);
+  } catch (std::exception) {
+    return false;
+  }
+  return false;
+}
+bool SEDiabetesType2::operator!=(SECondition const& rhs) const
+{
+  return !(*this == rhs);
+}
+//-------------------------------------------------------------------------------
+}

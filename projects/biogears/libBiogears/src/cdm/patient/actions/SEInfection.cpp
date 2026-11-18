@@ -1,0 +1,139 @@
+ /**************************************************************************************Copyright 2015 Applied Research Associates, Inc.Licensed under the Apache License, Version 2.0(the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the License
+at:
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+**************************************************************************************/
+#include <biogears/cdm/patient/actions/SEInfection.h>
+
+#include "io/cdm/PatientActions.h"
+#include <biogears/cdm/properties/SEScalarMassPerVolume.h>
+#include <biogears/schema/cdm/PatientActions.hxx>
+
+namespace biogears
+{
+  SEInfection::SEInfection()
+    : SEPatientAction()
+  {
+    m_Location = ""; //User input, location of infection
+    m_Severity = SEInfectionSeverity::Invalid;
+    m_MinimumInhibitoryConcentration = nullptr;
+  }
+  //-------------------------------------------------------------------------------
+  SEInfection::~SEInfection()
+  {
+    Invalidate();
+  }
+  //-------------------------------------------------------------------------------
+  void SEInfection::Invalidate()
+  {
+    SEPatientAction::Invalidate();
+    m_Location = "";
+    m_Severity = SEInfectionSeverity::Invalid;
+    SAFE_DELETE(m_MinimumInhibitoryConcentration);
+  }
+  //-------------------------------------------------------------------------------
+  bool SEInfection::IsValid() const
+  {
+    return SEPatientAction::IsValid() && HasLocation() && HasSeverity() && HasMinimumInhibitoryConcentration();
+  }
+  //-------------------------------------------------------------------------------
+  bool SEInfection::IsActive() const
+  {
+    return m_Severity == SEInfectionSeverity::Eliminated ? false : true;
+  }
+  //-------------------------------------------------------------------------------
+  const char* SEInfection::GetLocation_cStr() const
+  {
+    return m_Location.c_str();
+  }
+  //-------------------------------------------------------------------------------
+  std::string SEInfection::GetLocation() const
+  {
+    return m_Location;
+  }
+  //-------------------------------------------------------------------------------
+  bool SEInfection::HasLocation() const
+  {
+    return !m_Location.empty();
+  }
+  //-------------------------------------------------------------------------------
+  void SEInfection::InvalidateLocation()
+  {
+    m_Location = "";
+  }
+  //-------------------------------------------------------------------------------
+  void SEInfection::SetLocation(const char* name)
+  {
+    return SetLocation(std::string{ name });
+  }
+  //-------------------------------------------------------------------------------
+  void SEInfection::SetLocation(const std::string& name)
+  {
+    m_Location = name;
+  }
+  //-------------------------------------------------------------------------------
+  SEInfectionSeverity SEInfection::GetSeverity() const
+  {
+    return m_Severity;
+  }
+  //-------------------------------------------------------------------------------
+  void SEInfection::SetSeverity(SEInfectionSeverity t)
+  {
+    m_Severity = t;
+  }
+  //-------------------------------------------------------------------------------
+  bool SEInfection::HasSeverity() const
+  {
+    return m_Severity == (SEInfectionSeverity::Invalid) ? false : true;
+  }
+  //-------------------------------------------------------------------------------
+  void SEInfection::InvalidateSeverity()
+  {
+    m_Severity = SEInfectionSeverity::Invalid;
+  }
+  //-----------------------------------------------------------------------------
+  bool SEInfection::HasMinimumInhibitoryConcentration() const
+  {
+    return m_MinimumInhibitoryConcentration == nullptr ? false : true;
+  }
+  //-----------------------------------------------------------------------------
+  SEScalarMassPerVolume& SEInfection::GetMinimumInhibitoryConcentration()
+  {
+    if (m_MinimumInhibitoryConcentration == nullptr)
+      m_MinimumInhibitoryConcentration = new SEScalarMassPerVolume();
+    return *m_MinimumInhibitoryConcentration;
+  }
+  //-------------------------------------------------------------------------------
+  void SEInfection::ToString(std::ostream & str) const
+  {
+    str << "Patient Action : Infection";
+    if (HasComment())
+      str << "\n\tComment: " << m_Comment;
+    str << "\n\tSeverity:  ";
+    str << m_Severity;
+    str << "\n\tMinimum Inhibitory Concentration: ";
+    str << *m_MinimumInhibitoryConcentration;
+    str << "\n\tLocation: ";
+    HasLocation() ? str << GetLocation() : str << "No Location Set";
+    str << std::flush;
+  }
+  //-------------------------------------------------------------------------------
+bool SEInfection::operator==( const SEInfection& rhs) const
+{
+bool equivilant = m_Comment == rhs.m_Comment;
+  equivilant &= m_Location == rhs.m_Location;
+  equivilant &= m_Severity == rhs.m_Severity;
+  equivilant &= (m_MinimumInhibitoryConcentration && rhs.m_MinimumInhibitoryConcentration) ? m_MinimumInhibitoryConcentration->operator==(*rhs.m_MinimumInhibitoryConcentration) 
+    : m_MinimumInhibitoryConcentration == rhs.m_MinimumInhibitoryConcentration;
+  return equivilant;
+}
+//-------------------------------------------------------------------------------
+bool SEInfection::operator!=( const SEInfection& rhs) const
+{
+  return !(*this == rhs);
+}
+}

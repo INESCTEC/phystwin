@@ -1,0 +1,81 @@
+/**************************************************************************************
+Copyright 2015 Applied Research Associates, Inc.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the License
+at:
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+**************************************************************************************/
+#include <biogears/cdm/patient/assessments/SEPsychomotorVigilanceTask.h>
+
+#include <biogears/cdm/properties/SEScalar.h>
+#include <biogears/cdm/properties/SEScalarTime.h>
+#include <biogears/cdm/system/physiology/SENervousSystem.h>
+#include "io/cdm/PatientAssessments.h"
+
+namespace biogears {
+SEPsychomotorVigilanceTask::SEPsychomotorVigilanceTask()
+{
+  m_AttentionLapses = nullptr;
+  m_ReactionTime = nullptr;
+}
+//-------------------------------------------------------------------------------
+SEPsychomotorVigilanceTask::~SEPsychomotorVigilanceTask()
+{
+  Invalidate();
+}
+//-------------------------------------------------------------------------------
+void SEPsychomotorVigilanceTask::Invalidate()
+{
+  SEPatientAssessment::Invalidate();
+  SAFE_DELETE(m_AttentionLapses);
+  SAFE_DELETE(m_ReactionTime);
+}
+//-------------------------------------------------------------------------------
+void SEPsychomotorVigilanceTask::Reset()
+{
+  SEPatientAssessment::Reset();
+  INVALIDATE_PROPERTY(m_AttentionLapses);
+  INVALIDATE_PROPERTY(m_ReactionTime);
+}
+
+//-------------------------------------------------------------------------------
+bool SEPsychomotorVigilanceTask::HasAttentionLapses()
+{
+  return m_AttentionLapses == nullptr ? false : m_AttentionLapses->IsValid();
+}
+SEScalar& SEPsychomotorVigilanceTask::GetAttentionLapses()
+{
+  if (m_AttentionLapses == nullptr)
+    m_AttentionLapses = new SEScalar();
+  return *m_AttentionLapses;
+}
+//-------------------------------------------------------------------------------
+bool SEPsychomotorVigilanceTask::HasReactionTime()
+{
+  return m_ReactionTime == nullptr ? false : m_ReactionTime->IsValid();
+}
+SEScalarTime& SEPsychomotorVigilanceTask::GetReactionTime()
+{
+  if (m_ReactionTime == nullptr)
+    m_ReactionTime = new SEScalarTime();
+  return *m_ReactionTime;
+}
+//-------------------------------------------------------------------------------
+bool SEPsychomotorVigilanceTask::operator==(SEPsychomotorVigilanceTask const& rhs) const
+{
+  if (this == &rhs)
+    return true;
+
+  return ((m_AttentionLapses && rhs.m_AttentionLapses) ? m_AttentionLapses->operator==(*rhs.m_AttentionLapses) : m_AttentionLapses == rhs.m_AttentionLapses)
+    && ((m_ReactionTime && rhs.m_ReactionTime) ? m_ReactionTime->operator==(*rhs.m_ReactionTime) : m_ReactionTime == rhs.m_ReactionTime);
+}
+bool SEPsychomotorVigilanceTask::operator!=(SEPsychomotorVigilanceTask const& rhs) const
+{
+  return !(*this == rhs);
+}
+//-------------------------------------------------------------------------------
+}

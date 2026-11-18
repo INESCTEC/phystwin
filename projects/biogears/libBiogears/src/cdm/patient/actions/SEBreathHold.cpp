@@ -1,0 +1,80 @@
+/**************************************************************************************
+Copyright 2015 Applied Research Associates, Inc.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the License
+at:
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+**************************************************************************************/
+
+#include <biogears/cdm/patient/actions/SEBreathHold.h>
+
+#include "io/cdm/PatientActions.h"
+#include <biogears/cdm/properties/SEScalar0To1.h>
+#include <biogears/cdm/properties/SEScalarTime.h>
+
+namespace biogears {
+SEBreathHold::SEBreathHold()
+  : SEConsciousRespirationCommand()
+{
+  m_Period = nullptr;
+}
+//-------------------------------------------------------------------------------
+SEBreathHold::~SEBreathHold()
+{
+  Invalidate();
+}
+//-------------------------------------------------------------------------------
+void SEBreathHold::Invalidate()
+{
+  SEConsciousRespirationCommand::Invalidate();
+  SAFE_DELETE(m_Period);
+}
+//-------------------------------------------------------------------------------
+bool SEBreathHold::IsValid() const
+{
+  return SEConsciousRespirationCommand::IsValid() && HasPeriod();
+}
+//-------------------------------------------------------------------------------
+bool SEBreathHold::IsActive() const
+{
+  return SEConsciousRespirationCommand::IsActive();
+}
+//-------------------------------------------------------------------------------
+bool SEBreathHold::HasPeriod() const
+{
+  return m_Period == nullptr ? false : m_Period->IsValid();
+}
+//-------------------------------------------------------------------------------
+SEScalarTime& SEBreathHold::GetPeriod()
+{
+  if (m_Period == nullptr)
+    m_Period = new SEScalarTime();
+  return *m_Period;
+}
+//-------------------------------------------------------------------------------
+void SEBreathHold::ToString(std::ostream& str) const
+{
+  str << "Breath Hold";
+  if (HasComment())
+    str << "\n\tComment: " << m_Comment;
+  str << "\n\tPeriod: ";
+  HasPeriod() ? str << *m_Period : str << "NaN";
+  str << std::flush;
+}
+//-------------------------------------------------------------------------------
+bool SEBreathHold::operator==( const SEBreathHold& rhs) const
+{
+  bool equivilant = m_Comment == rhs.m_Comment;
+  equivilant &= (m_Period && rhs.m_Period) ? m_Period->operator==(*rhs.m_Period) : m_Period == rhs.m_Period;
+  return equivilant;
+}
+//-------------------------------------------------------------------------------
+bool SEBreathHold::operator!=( const SEBreathHold& rhs) const
+{
+  return !(*this == rhs);
+}
+}

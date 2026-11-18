@@ -1,0 +1,212 @@
+/**************************************************************************************
+Copyright 2015 Applied Research Associates, Inc.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the License
+at:
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+**************************************************************************************/
+#include <biogears/cdm/substance/SESubstanceCompound.h>
+
+#include "io/cdm/Substance.h"
+
+#include <biogears/cdm/properties/SEScalarMassPerVolume.h>
+#include <biogears/cdm/substance/SESubstanceConcentration.h>
+#include <biogears/cdm/substance/SESubstanceManager.h>
+
+namespace biogears {
+SESubstanceCompound::SESubstanceCompound(const std::string& name, Logger* logger)
+  : Loggable(logger)
+  , m_Name(name)
+  , m_Classification(SESubstanceClass::Invalid)
+{
+}
+SESubstanceCompound::SESubstanceCompound(const char* name, Logger* logger)
+  : SESubstanceCompound(std::string { name }, logger)
+{
+}
+SESubstanceCompound::SESubstanceCompound(Logger* logger)
+  : SESubstanceCompound("", logger)
+{
+}
+//-----------------------------------------------------------------------------
+SESubstanceCompound::~SESubstanceCompound()
+{
+  Invalidate();
+}
+//-----------------------------------------------------------------------------
+std::unique_ptr<SESubstanceCompound> SESubstanceCompound::make_unique(const std::string& name, Logger* logger)
+{
+  return std::make_unique<SESubstanceCompound>(name, logger);
+}
+//-----------------------------------------------------------------------------
+void SESubstanceCompound::Invalidate()
+{
+  m_Name = "";
+  m_Classification = (SESubstanceClass)-1;
+}
+
+//-----------------------------------------------------------------------------
+std::string SESubstanceCompound::GetName() const
+{
+  return m_Name;
+}
+//-----------------------------------------------------------------------------
+const char* SESubstanceCompound::GetName_cStr() const
+{
+  return m_Name.c_str();
+}
+//-----------------------------------------------------------------------------
+void SESubstanceCompound::SetName(const char* name)
+{
+  m_Name = name;
+}
+//-----------------------------------------------------------------------------
+void SESubstanceCompound::SetName(const std::string& name)
+{
+  m_Name = name;
+}
+//-----------------------------------------------------------------------------
+bool SESubstanceCompound::HasName() const
+{
+  return m_Name.empty() ? false : true;
+}
+//-----------------------------------------------------------------------------
+void SESubstanceCompound::InvalidateName()
+{
+  m_Name = "";
+}
+//-----------------------------------------------------------------------------
+SESubstanceClass SESubstanceCompound::GetClassification() const
+{
+  return m_Classification;
+}
+//-----------------------------------------------------------------------------
+void SESubstanceCompound::SetClassification(SESubstanceClass subClass)
+{
+  m_Classification = subClass;
+}
+//-----------------------------------------------------------------------------
+bool SESubstanceCompound::HasClassification() const
+{
+  return m_Classification == SESubstanceClass::Invalid ? false : true;
+}
+//-----------------------------------------------------------------------------
+void SESubstanceCompound::InvalidateClassification()
+{
+  m_Classification = (SESubstanceClass)-1;
+}
+//-----------------------------------------------------------------------------
+bool SESubstanceCompound::GetRhFactor() const
+{
+  return m_RhFactor;
+}
+//-----------------------------------------------------------------------------
+void SESubstanceCompound::SetRhFactor(bool subFactor)
+{
+  m_RhFactor = subFactor;
+}
+//-----------------------------------------------------------------------------
+bool SESubstanceCompound::HasRhFactor() const
+{
+  return (m_RhFactor == true || m_RhFactor == false) ? true : false;
+}
+//-----------------------------------------------------------------------------
+bool SESubstanceCompound::HasComponent() const
+{
+  return m_Components.size() == 0 ? false : true;
+}
+//-----------------------------------------------------------------------------
+bool SESubstanceCompound::HasComponent(const SESubstance& substance) const
+{
+  for (auto const& q : m_Components) {
+    if (substance == q.GetSubstance()) {
+      return true;
+    }
+  }
+  return false;
+}
+//-----------------------------------------------------------------------------
+std::vector<SESubstanceConcentration>& SESubstanceCompound::GetComponents()
+{
+  return m_Components;
+}
+//-----------------------------------------------------------------------------
+const std::vector<SESubstanceConcentration> SESubstanceCompound::GetComponents() const
+{
+  std::vector<SESubstanceConcentration> cCompounds;
+  for (auto& component : m_Components) {
+    cCompounds.push_back(component);
+  }
+  return cCompounds;
+}
+//-----------------------------------------------------------------------------
+SESubstanceConcentration& SESubstanceCompound::GetComponent(SESubstance const& substance)
+{
+  for (auto& sq : m_Components) {
+    if (substance == sq.GetSubstance())
+      return sq;
+  }
+  m_Components.emplace_back(substance.GetDefinition(), 0, MassPerVolumeUnit::ug_Per_mL);
+  return m_Components.back();
+}
+//-----------------------------------------------------------------------------
+SESubstanceConcentration SESubstanceCompound::GetComponent(SESubstance const& substance) const
+{
+  for (auto& sq : m_Components) {
+    if (substance == sq.GetSubstance())
+      return sq;
+  }
+  throw CommonDataModelException();
+}
+//-----------------------------------------------------------------------------
+SESubstanceConcentration& SESubstanceCompound::GetComponent(SESubstanceDefinition const& substance)
+{
+  for (auto& sq : m_Components) {
+    if (substance == sq.GetSubstance())
+      return sq;
+  }
+  m_Components.emplace_back(substance, 0, MassPerVolumeUnit::ug_Per_mL);
+  return m_Components.back();
+}
+//-----------------------------------------------------------------------------
+SESubstanceConcentration SESubstanceCompound::GetComponent(SESubstanceDefinition const& substance) const
+{
+  for (auto& sq : m_Components) {
+    if (substance == sq.GetSubstance())
+      return sq;
+  }
+  throw CommonDataModelException();
+}
+//-----------------------------------------------------------------------------
+void SESubstanceCompound::RemoveComponent(const SESubstance& substance)
+{
+  unsigned int i = 0;
+  for (auto& sq : m_Components) {
+    if (substance == sq.GetSubstance()) {
+      m_Components.erase(m_Components.begin() + i);
+    }
+    i++;
+  }
+}
+//-------------------------------------------------------------------------------
+bool SESubstanceCompound::operator==(const SESubstanceCompound& rhs) const
+{
+  bool equivilant = m_Name == rhs.m_Name;
+  equivilant &= m_RhFactor == rhs.m_RhFactor;
+  equivilant &= m_Classification == rhs.m_Classification;
+  equivilant &= m_Components.size() == rhs.m_Components.size();
+  for (auto i = 0; equivilant && i < m_Components.size(); ++i) {
+    equivilant &= m_Components[i] == rhs.m_Components[i];
+  }
+  return equivilant;
+}
+//-------------------------------------------------------------------------------
+bool SESubstanceCompound::operator!=(const SESubstanceCompound& rhs) const
+{
+  return !(*this == rhs);
+}
+}

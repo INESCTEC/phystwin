@@ -1,0 +1,86 @@
+/**************************************************************************************
+Copyright 2015 Applied Research Associates, Inc.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the License
+at:
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+**************************************************************************************/
+#include <biogears/cdm/system/equipment/Anesthesia/actions/SESodaLimeFailure.h>
+
+#include "io/cdm/Anesthesia.h"
+#include "io/cdm/AnesthesiaActions.h"
+
+#include <biogears/cdm/properties/SEScalar0To1.h>
+#include <biogears/schema/cdm/Properties.hxx>
+
+namespace biogears {
+SESodaLimeFailure::SESodaLimeFailure()
+  : SEAnesthesiaMachineAction()
+{
+  m_Severity = nullptr;
+}
+//-------------------------------------------------------------------------------
+SESodaLimeFailure::~SESodaLimeFailure()
+{
+  Invalidate();
+}
+//-------------------------------------------------------------------------------
+void SESodaLimeFailure::Invalidate()
+{
+  SEAnesthesiaMachineAction::Invalidate();
+  SAFE_DELETE(m_Severity);
+}
+//-------------------------------------------------------------------------------
+bool SESodaLimeFailure::IsValid() const
+{
+  return SEAnesthesiaMachineAction::IsValid() && HasSeverity();
+}
+//-------------------------------------------------------------------------------
+bool SESodaLimeFailure::IsActive() const
+{
+  return HasSeverity() ? !m_Severity->IsZero() : false;
+}
+
+//-------------------------------------------------------------------------------
+bool SESodaLimeFailure::HasSeverity() const
+{
+  return m_Severity != nullptr;
+}
+//-------------------------------------------------------------------------------
+SEScalar0To1& SESodaLimeFailure::GetSeverity()
+{
+  if (m_Severity == nullptr)
+    m_Severity = new SEScalar0To1();
+  return *m_Severity;
+}
+//-------------------------------------------------------------------------------
+void SESodaLimeFailure::ToString(std::ostream& str) const
+{
+  str << "Anesthesia Machine Action : Soda Lime Failure";
+  if (HasComment())
+    str << "\n\tComment: " << m_Comment;
+  str << "\n\tSeverity :";
+  HasSeverity() ? str << *m_Severity : str << "NaN";
+  str << std::flush;
+}
+//-------------------------------------------------------------------------------
+bool SESodaLimeFailure::operator==(SESodaLimeFailure const& rhs) const
+{
+  if (this == &rhs)
+    return true;
+
+  return ((m_Severity && rhs.m_Severity) ? m_Severity->operator==(*rhs.m_Severity)
+                                         : m_Severity == rhs.m_Severity)
+    && m_Comment == rhs.m_Comment;
+}
+//-------------------------------------------------------------------------------
+bool SESodaLimeFailure::operator!=(SESodaLimeFailure const& rhs) const
+{
+  return !(*this == rhs);
+}
+//-------------------------------------------------------------------------------
+}
